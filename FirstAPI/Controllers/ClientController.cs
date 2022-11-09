@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using FirstAPI.DTOs.Client;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Reflection.Metadata.Ecma335;
@@ -24,27 +26,35 @@ namespace FirstAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> Get(Guid id)
         {
-            var newClient = await _context.Clients.FindAsync(id);
-            if (newClient == null)
-                return BadRequest("Error. Client not found.");
-            return Ok(newClient);
+            var client = await _context.Clients.Where(c => c.Id == id).ToListAsync();
+            if(client == null)
+                return NotFound("Erro. Cliente inexistente");
+
+            return Ok(client);
+
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<Client>>> AddClient(Client newClient)
+        public async Task<ActionResult<List<Client>>> AddClient(AddClientDto newClient)
         {
-            _context.Clients.Add(newClient);
+            var client = new Client
+            {
+                FirstName = newClient.FirstName,
+                LastName = newClient.LastName,
+                Cpf = newClient.Cpf
+            };
+            _context.Clients.Add(client); ;
             await _context.SaveChangesAsync();
 
             return Ok(await _context.Clients.ToListAsync());
         }
 
         [HttpPut]
-        public async Task<ActionResult<List<Client>>> UpdateClient(Client request)
+        public async Task<ActionResult<List<Client>>> UpdateClient(UpdateClientDto request)
         {
             var dbClient = await _context.Clients.FindAsync(request.Id);
             if (dbClient == null)
-                return BadRequest("Error. Client not found.");
+                return BadRequest("Erro. Cliente inexistente.");
 
             dbClient.FirstName = request.FirstName;
             dbClient.LastName = request.LastName;
@@ -60,7 +70,7 @@ namespace FirstAPI.Controllers
         {
             var dbClient = await _context.Clients.FindAsync(id);
             if (dbClient == null)
-                return BadRequest("Error. Client not found.");
+                return BadRequest("Erro. Cliente inexistente.");
 
             _context.Clients.Remove(dbClient);
             await _context.SaveChangesAsync();

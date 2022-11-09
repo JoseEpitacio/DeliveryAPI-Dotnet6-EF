@@ -10,5 +10,8 @@ namespace FirstAPI.Data
         }
 
         public DbSet<Client> Clients { get; set; }
+        public DbSet<Address> Address { get; set; }
+        public DbSet<Contact> Contact { get; set; }
+        public DbSet<Order> Order { get; set; }
     }
 }
